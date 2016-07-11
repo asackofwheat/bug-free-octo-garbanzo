@@ -1,3 +1,5 @@
+Mike Lee
+
 ## Week 1 Assessment
 
 Welcome to the VCS week 1 assessment. You'll be writing code to make RSpec tests pass.
