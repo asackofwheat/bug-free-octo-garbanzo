@@ -4,81 +4,88 @@ class BattleBot
 
   attr_reader :name, :health, :enemies, :weapon
 
-  def initialize(name, damage = nil)
-    @name = name || "C3PO"
+  @@count = 0
+
+  def self.count
+    @@count
+  end
+
+  def initialize(name)
+
+    @name = name
     @health = 100
     @enemies = []
     @weapon = nil
-    @damage = damage
-    @dead = false
+    @@count += 1
+
   end
 
   def dead?
-    if health > 0
-      false
-    else
-      true
-    end
+    @health == 0 ? true : false
   end
 
   def has_weapon?
-    if @weapon != nil
-      true
-    else
-      false
-    end
-  end
-
-  def take_damage(amount)
-    raise ArgumentError unless amount.is_a?(Fixnum)
-    @health = @health - amount
-    if @health < 0
-      @health = 0
-    end
-    @health
+    !@weapon.nil?
   end
 
   def pick_up(weapon)
     raise ArgumentError unless weapon.is_a?(Weapon)
-    @weapon = weapon
+    raise ArgumentError unless weapon.bot == nil
+    if @weapon == nil
+      @weapon = weapon
+      weapon.bot = self
+      weapon
+    end
   end
 
   def drop_weapon
+    weapon.bot = nil
     @weapon = nil
   end
 
-  def heal
-    if @health == 0
-      @health = @health
-    end
-    @health = @health + 10
-    if @health > 100
-      @health = 100
+  def take_damage(amount)
+    raise ArgumentError unless amount.is_a?(Fixnum)
+    @health -= amount
+    if @health <= 0
+      @health = 0
+      @@count -= 1
     end
     @health
   end
 
-  def attack(guy)
-    raise ArgumentError unless guy.is_a?(BattleBot)
-    raise ArgumentError if guy == self
-    raise ArgumentError if weapon == nil
-    guy.receive_attack_from(self)
+  def heal
+    if !dead?
+      @health += 10
+      @health = 100 if @health > 100
+      @health
+    end
   end
 
-  def receive_attack_from(guy)
-    raise ArgumentError unless guy.is_a?(BattleBot)
-    raise ArgumentError if guy == self
-    raise ArgumentError if guy.weapon == nil
-    take_damage(guy.weapon.damage)
-    @enemies << guy
+  def attack(enemy)
+    raise ArgumentError unless enemy.is_a?(BattleBot)
+    raise ArgumentError if enemy == self
+    raise ArgumentError if @weapon == nil
+    enemy.receive_attack_from(self)
+  end
+
+  def receive_attack_from(enemy)
+    raise ArgumentError unless enemy.is_a?(BattleBot)
+    raise ArgumentError if enemy == self
+    raise ArgumentError if enemy.weapon == nil
+    take_damage(enemy.weapon.damage)
+    @enemies << enemy unless @enemies.include?(enemy)
+    defend_against(enemy)
   end
 
   def defend_against(enemy)
-    dead?
-    has_weapon?
+    raise ArgumentError unless enemy.is_a?(BattleBot)
+    attack(enemy) if !dead? && has_weapon?
   end
-
-  def self.bots
-  end
-
 end
+
+
+
+# bot = BattleBot.new("C-3PO")
+# light_saber = Weapon.new("LightSaber")
+# death_star = Weapon.new("DeathStart", 30)
+# enemy = BattleBot.new("R2-D2")

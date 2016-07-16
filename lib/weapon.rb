@@ -1,30 +1,28 @@
-require 'battle_bot'
+require_relative 'battle_bot'
 
 class Weapon
 
-  attr_reader :name
+  attr_reader :name, :damage
 
-  def initialize(name, damage = nil)
-    raise ArgumentError unless name.is_a?(String)
+  def initialize(name, damage = 0)
     raise ArgumentError unless damage.is_a?(Fixnum) || damage == nil
+    raise ArgumentError unless name.is_a?(String)
     @name = name
     @damage = damage
     @bot = nil
-  end
-
-  def bot=(bot_name)
-    raise ArgumentError unless bot_name.is_a?(BattleBot) || bot_name == nil
-    @bot = bot_name
   end
 
   def bot
     @bot
   end
 
-  def picked_up?
-    true
+  def bot=(name)
+    raise ArgumentError unless name.is_a?(BattleBot) || name == nil
+    @bot = name
   end
 
-
+  def picked_up?
+    @bot == nil ? false : true
+  end
 
 end
